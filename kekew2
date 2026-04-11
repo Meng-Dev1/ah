@@ -1,0 +1,164 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer.PlayerGui
+
+-- Screen GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MengHubFarewell"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = PlayerGui
+
+-- Background
+local BG = Instance.new("Frame")
+BG.Size = UDim2.fromScale(1, 1)
+BG.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BG.BackgroundTransparency = 1
+BG.ZIndex = 100
+BG.Parent = ScreenGui
+
+-- Container
+local Container = Instance.new("Frame")
+Container.Size = UDim2.fromOffset(420, 320)
+Container.AnchorPoint = Vector2.new(0.5, 0.5)
+Container.Position = UDim2.fromScale(0.5, 0.6)
+Container.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+Container.BackgroundTransparency = 1
+Container.ZIndex = 101
+Container.Parent = BG
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 16)
+UICorner.Parent = Container
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(80, 60, 120)
+UIStroke.Thickness = 1.5
+UIStroke.Transparency = 1
+UIStroke.Parent = Container
+
+-- Icon
+local Icon = Instance.new("ImageLabel")
+Icon.Size = UDim2.fromOffset(80, 80)
+Icon.AnchorPoint = Vector2.new(0.5, 0)
+Icon.Position = UDim2.new(0.5, 0, 0, 30)
+Icon.BackgroundTransparency = 1
+Icon.Image = "rbxassetid://90292614315729"
+Icon.ImageTransparency = 1
+Icon.ZIndex = 102
+Icon.Parent = Container
+
+local IconCorner = Instance.new("UICorner")
+IconCorner.CornerRadius = UDim.new(0, 12)
+IconCorner.Parent = Icon
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -40, 0, 36)
+Title.AnchorPoint = Vector2.new(0.5, 0)
+Title.Position = UDim2.new(0.5, 0, 0, 122)
+Title.BackgroundTransparency = 1
+Title.Text = "Meng Hub"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextTransparency = 1
+Title.Font = Enum.Font.Gotham
+Title.TextSize = 28
+Title.ZIndex = 102
+Title.Parent = Container
+
+-- Divider
+local Divider = Instance.new("Frame")
+Divider.Size = UDim2.new(0, 0, 0, 1)
+Divider.AnchorPoint = Vector2.new(0.5, 0)
+Divider.Position = UDim2.new(0.5, 0, 0, 168)
+Divider.BackgroundColor3 = Color3.fromRGB(80, 60, 120)
+Divider.BorderSizePixel = 0
+Divider.ZIndex = 102
+Divider.Parent = Container
+
+-- Message
+local Message = Instance.new("TextLabel")
+Message.Size = UDim2.new(1, -50, 0, 80)
+Message.AnchorPoint = Vector2.new(0.5, 0)
+Message.Position = UDim2.new(0.5, 0, 0, 182)
+Message.BackgroundTransparency = 1
+Message.Text = "Thank you for being part of this journey.\nMeng Hub has reached its end — but the memories, the trades, and the moments we shared will always remain.\n\nUntil we meet again. 🌙"
+Message.TextColor3 = Color3.fromRGB(180, 170, 200)
+Message.TextTransparency = 1
+Message.Font = Enum.Font.Gotham
+Message.TextSize = 13
+Message.TextWrapped = true
+Message.ZIndex = 102
+Message.Parent = Container
+
+-- Version
+local Version = Instance.new("TextLabel")
+Version.Size = UDim2.new(1, -40, 0, 20)
+Version.AnchorPoint = Vector2.new(0.5, 0)
+Version.Position = UDim2.new(0.5, 0, 0, 272)
+Version.BackgroundTransparency = 1
+Version.Text = "— Meng Hub, Final Release —"
+Version.TextColor3 = Color3.fromRGB(100, 80, 140)
+Version.TextTransparency = 1
+Version.Font = Enum.Font.GothamItalic
+Version.TextSize = 11
+Version.ZIndex = 102
+Version.Parent = Container
+
+-- ========================
+-- Animasi
+-- ========================
+local ease = TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local easeSlow = TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+
+local function tween(obj, props, ti)
+    TweenService:Create(obj, ti or ease, props):Play()
+end
+
+task.spawn(function()
+    -- Fade in BG
+    tween(BG, {BackgroundTransparency = 0.4}, TweenInfo.new(0.8, Enum.EasingStyle.Quint))
+    task.wait(0.3)
+
+    -- Slide container dari bawah + fade in
+    tween(Container, {
+        BackgroundTransparency = 0,
+        Position = UDim2.fromScale(0.5, 0.5)
+    }, easeSlow)
+    tween(UIStroke, {Transparency = 0}, easeSlow)
+    task.wait(0.4)
+
+    -- Icon
+    tween(Icon, {ImageTransparency = 0}, ease)
+    task.wait(0.3)
+
+    -- Title
+    tween(Title, {TextTransparency = 0}, ease)
+    task.wait(0.2)
+
+    -- Divider expand
+    tween(Divider, {Size = UDim2.new(0.7, 0, 0, 1)}, ease)
+    task.wait(0.3)
+
+    -- Message
+    tween(Message, {TextTransparency = 0}, TweenInfo.new(0.8, Enum.EasingStyle.Quint))
+    task.wait(0.3)
+
+    -- Version
+    tween(Version, {TextTransparency = 0}, ease)
+    task.wait(4)
+
+    -- Fade out semua
+    tween(BG, {BackgroundTransparency = 1}, TweenInfo.new(1.2, Enum.EasingStyle.Quint))
+    tween(Container, {BackgroundTransparency = 1, Position = UDim2.fromScale(0.5, 0.6)}, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In))
+    tween(UIStroke, {Transparency = 1}, ease)
+    tween(Icon, {ImageTransparency = 1}, ease)
+    tween(Title, {TextTransparency = 1}, ease)
+    tween(Divider, {Size = UDim2.new(0, 0, 0, 1)}, ease)
+    tween(Message, {TextTransparency = 1}, ease)
+    tween(Version, {TextTransparency = 1}, ease)
+    task.wait(1.2)
+
+    ScreenGui:Destroy()
+end)
