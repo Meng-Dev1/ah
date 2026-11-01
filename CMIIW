@@ -4217,7 +4217,7 @@ function Menghub:Window(GuiConfig)
                 UICorner15.CornerRadius = UDim.new(0, 4)
                 UICorner15.Parent = Slider
 
-                -- Title (top-left)
+                -- Title
                 SliderTitle.Font = Enum.Font.GothamBold
                 SliderTitle.Text = SliderConfig.Title
                 SliderTitle.TextColor3 = Color3.fromRGB(230, 230, 230)
@@ -4232,7 +4232,7 @@ function Menghub:Window(GuiConfig)
                 SliderTitle.ZIndex = 2
                 SliderTitle.Parent = Slider
 
-                -- Description under title
+                -- Description
                 SliderContent.Font = Enum.Font.Gotham
                 SliderContent.Text = SliderConfig.Content
                 SliderContent.TextColor3 = Color3.fromRGB(160, 160, 170)
@@ -4250,7 +4250,7 @@ function Menghub:Window(GuiConfig)
                 SliderContent.ZIndex = 2
                 SliderContent.Parent = Slider
 
-                -- Value box (top-right)
+                -- Value box
                 SliderInput.AnchorPoint = Vector2.new(1, 0)
                 SliderInput.BackgroundColor3 = Color3.fromRGB(36, 36, 44)
                 SliderInput.BorderSizePixel = 0
@@ -4284,7 +4284,7 @@ function Menghub:Window(GuiConfig)
                 TextBox.Active = true
                 TextBox.Parent = SliderInput
 
-                -- Full-width track at the bottom
+                -- Track
                 SliderFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
                 SliderFrame.BackgroundTransparency = 0
                 SliderFrame.BorderSizePixel = 0
@@ -4292,12 +4292,13 @@ function Menghub:Window(GuiConfig)
                 SliderFrame.Size = UDim2.new(1, -24, 0, 4)
                 SliderFrame.Name = "SliderFrame"
                 SliderFrame.ZIndex = 2
+                SliderFrame.ClipsDescendants = false
                 SliderFrame.Parent = Slider
 
                 UICorner17.CornerRadius = UDim.new(1, 0)
                 UICorner17.Parent = SliderFrame
 
-                -- Hitbox HANYA di area track
+                -- Hitbox
                 local SliderHitbox = Instance.new("Frame")
                 SliderHitbox.BackgroundTransparency = 1
                 SliderHitbox.Position = UDim2.new(0, 12, 1, -22)
@@ -4307,7 +4308,7 @@ function Menghub:Window(GuiConfig)
                 SliderHitbox.Name = "SliderHitbox"
                 SliderHitbox.Parent = Slider
 
-                -- Filled portion
+                -- Fill
                 SliderDraggable.AnchorPoint = Vector2.new(0, 0.5)
                 SliderDraggable.BackgroundColor3 = GuiConfig.Color
                 SliderDraggable.BorderSizePixel = 0
@@ -4320,15 +4321,18 @@ function Menghub:Window(GuiConfig)
                 UICorner18.CornerRadius = UDim.new(1, 0)
                 UICorner18.Parent = SliderDraggable
 
-                -- Circle handle
-                SliderCircle.AnchorPoint = Vector2.new(1, 0.5)
+                -- Circle (parent ke track, BUKAN ke fill)
+                local CIRCLE_SIZE = 12
+                local CIRCLE_PAD = CIRCLE_SIZE / 2
+
+                SliderCircle.AnchorPoint = Vector2.new(0.5, 0.5)
                 SliderCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 SliderCircle.BorderSizePixel = 0
-                SliderCircle.Position = UDim2.new(1, 0, 0.5, 0)
-                SliderCircle.Size = UDim2.new(0, 12, 0, 12)
+                SliderCircle.Position = UDim2.new(0, CIRCLE_PAD, 0.5, 0)
+                SliderCircle.Size = UDim2.new(0, CIRCLE_SIZE, 0, CIRCLE_SIZE)
                 SliderCircle.Name = "SliderCircle"
                 SliderCircle.ZIndex = 4
-                SliderCircle.Parent = SliderDraggable
+                SliderCircle.Parent = SliderFrame
 
                 UICorner19.CornerRadius = UDim.new(1, 0)
                 UICorner19.Parent = SliderCircle
@@ -4370,6 +4374,18 @@ function Menghub:Window(GuiConfig)
                     return math.floor(Number / Factor + 0.5) * Factor
                 end
 
+                -- INI YANG PENTING: posisi circle dengan padding biar ga kepotong di 0 / max
+                local function UpdateCirclePos(ratio)
+                    local trackW = SliderFrame.AbsoluteSize.X
+                    if trackW <= 0 then
+                        SliderCircle.Position = UDim2.new(0, CIRCLE_PAD, 0.5, 0)
+                        return
+                    end
+                    local usable = math.max(trackW - CIRCLE_SIZE, 0)
+                    local x = CIRCLE_PAD + usable * ratio
+                    SliderCircle.Position = UDim2.new(0, x, 0.5, 0)
+                end
+
                 function SliderFunc:Set(Value)
                     Value = math.clamp(Round(Value, SliderConfig.Increment), SliderConfig.Min, SliderConfig.Max)
                     SliderFunc.Value = Value
@@ -4382,11 +4398,14 @@ function Menghub:Window(GuiConfig)
                     if SliderConfig.Max ~= SliderConfig.Min then
                         ratio = (Value - SliderConfig.Min) / (SliderConfig.Max - SliderConfig.Min)
                     end
+
                     TweenService:Create(
                         SliderDraggable,
                         TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
                         { Size = UDim2.new(ratio, 0, 1, 0) }
                     ):Play()
+
+                    UpdateCirclePos(ratio)
 
                     if SliderConfig.Callback then
                         SliderConfig.Callback(Value)
@@ -4400,6 +4419,14 @@ function Menghub:Window(GuiConfig)
                 function SliderFunc:GetValue()
                     return self.Value
                 end
+
+                SliderFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+                    local ratio = 0
+                    if SliderConfig.Max ~= SliderConfig.Min then
+                        ratio = (SliderFunc.Value - SliderConfig.Min) / (SliderConfig.Max - SliderConfig.Min)
+                    end
+                    UpdateCirclePos(ratio)
+                end)
 
                 TextBox.Focused:Connect(function()
                     TextBoxFocused = true
@@ -4451,7 +4478,7 @@ function Menghub:Window(GuiConfig)
                             TweenService:Create(
                                 SliderCircle,
                                 TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                                { Size = UDim2.new(0, 12, 0, 12) }
+                                { Size = UDim2.new(0, CIRCLE_SIZE, 0, CIRCLE_SIZE) }
                             ):Play()
                         end
                     end
@@ -4473,7 +4500,7 @@ function Menghub:Window(GuiConfig)
                         TweenService:Create(
                             SliderCircle,
                             TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                            { Size = UDim2.new(0, 12, 0, 12) }
+                            { Size = UDim2.new(0, CIRCLE_SIZE, 0, CIRCLE_SIZE) }
                         ):Play()
                     end
                 end)
