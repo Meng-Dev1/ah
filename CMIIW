@@ -4369,13 +4369,33 @@ function Menghub:Window(GuiConfig)
                 local Dragging = false
                 local TextBoxFocused = false
 
-                local function Round(Number, Factor)
-                    if Factor == 0 then return Number end
-                    return math.floor(Number / Factor + 0.5) * Factor
+                local function getDecimals(increment)
+                    if not increment or increment >= 1 then
+                        return 0
+                    end
+                    local d = math.ceil(-math.log10(increment + 1e-12))
+                    return math.clamp(d, 0, 8)
                 end
 
-                -- INI YANG PENTING: posisi circle dengan padding biar ga kepotong di 0 / max
+                local function Round(Number, Factor)
+                    if not Factor or Factor == 0 then
+                        return Number
+                    end
+                    local decimals = getDecimals(Factor)
+                    local mult = 10 ^ decimals
+                    return math.floor(Number * mult + 0.5) / mult
+                end
+
+                local function FormatValue(Number)
+                    local decimals = getDecimals(SliderConfig.Increment)
+                    if decimals <= 0 then
+                        return tostring(math.floor(Number + 0.5))
+                    end
+                    return string.format("%." .. decimals .. "f", Number)
+                end
+
                 local function UpdateCirclePos(ratio)
+                    ratio = math.clamp(ratio or 0, 0, 1)
                     local trackW = SliderFrame.AbsoluteSize.X
                     if trackW <= 0 then
                         SliderCircle.Position = UDim2.new(0, CIRCLE_PAD, 0.5, 0)
@@ -4390,7 +4410,7 @@ function Menghub:Window(GuiConfig)
                     Value = math.clamp(Round(Value, SliderConfig.Increment), SliderConfig.Min, SliderConfig.Max)
                     SliderFunc.Value = Value
                     if not TextBoxFocused then
-                        TextBox.Text = tostring(Value)
+                        TextBox.Text = FormatValue(Value)  -- JANGAN tostring(Value)
                     end
                     ConfigData[configKey] = Value
 
