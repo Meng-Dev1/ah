@@ -27,6 +27,44 @@ function SaveConfig(name)
     end
 end
 
+function LoadConfigElements()
+    for key, element in pairs(Elements) do
+        local targetValue = ConfigData[key]
+
+        if targetValue == nil then
+            continue
+        end
+
+        if element.Set then
+            if element.Premium == true or string.find(key, "Premium", 1, true) then
+                if not CheckIsPremium() then
+                    if element.Type == "Toggle" then
+                        targetValue = false
+                    else
+                        continue
+                    end
+                end
+            end
+
+            if element.Type == "Dropdown" then
+                if element.SetValues and element.Options then
+                    element:SetValues(element.Options, targetValue)
+                else
+                    element:Set(targetValue)
+                end
+            elseif element.Type == "Colorpicker" then
+                if type(targetValue) == "table" and targetValue.r and targetValue.g and targetValue.b then
+                    element:Set(Color3.new(targetValue.r, targetValue.g, targetValue.b))
+                elseif typeof(targetValue) == "Color3" then
+                    element:Set(targetValue)
+                end
+            else
+                element:Set(targetValue)
+            end
+        end
+    end
+end
+
 function LoadConfigFromFile(name)
     CheckFolders()
     local fileName = _G.ConfigFolder .. (name or "Default") .. ".json"
@@ -48,51 +86,51 @@ function LoadConfigFromFile(name)
     return false
 end
 
-function LoadConfigElements()
-    for key, element in pairs(Elements) do
-        local targetValue = ConfigData[key]
+-- function LoadConfigElements()
+--     for key, element in pairs(Elements) do
+--         local targetValue = ConfigData[key]
         
-        if element.Set then
-            if targetValue ~= nil then
-                if element.Premium == true or string.find(key, "Premium", 1, true) then
-                    if not CheckIsPremium() then
-                        targetValue = false
-                    end
-                end
+--         if element.Set then
+--             if targetValue ~= nil then
+--                 if element.Premium == true or string.find(key, "Premium", 1, true) then
+--                     if not CheckIsPremium() then
+--                         targetValue = false
+--                     end
+--                 end
 
-                if element.Type == "Dropdown" then
-                    if element.SetValues and element.Options then
-                        element:SetValues(element.Options, targetValue)
-                    else
-                        element:Set(targetValue)
-                    end
-                elseif element.Type == "Colorpicker" then
-                    if type(targetValue) == "table" and targetValue.r and targetValue.g and targetValue.b then
-                        element:Set(Color3.new(targetValue.r, targetValue.g, targetValue.b))
-                    elseif typeof(targetValue) == "Color3" then
-                        element:Set(targetValue)
-                    end
-                else
-                    element:Set(targetValue)
-                end
-            else
-                if element.Type == "Toggle" then
-                    element:Set(false)
-                elseif element.Type == "Slider" then
-                    element:Set(element.Default or 0)
-                elseif element.Type == "Dropdown" then
-                    element:Set(element.Default or (element.Multi and {} or ""))
-                elseif element.Type == "Input" then
-                    element:Set("")
-                elseif element.Type == "Keybind" then
-                    element:Set("None")
-                elseif element.Type == "Colorpicker" then
-                    -- biarin default yang sudah di-set saat create
-                end
-            end
-        end
-    end
-end
+--                 if element.Type == "Dropdown" then
+--                     if element.SetValues and element.Options then
+--                         element:SetValues(element.Options, targetValue)
+--                     else
+--                         element:Set(targetValue)
+--                     end
+--                 elseif element.Type == "Colorpicker" then
+--                     if type(targetValue) == "table" and targetValue.r and targetValue.g and targetValue.b then
+--                         element:Set(Color3.new(targetValue.r, targetValue.g, targetValue.b))
+--                     elseif typeof(targetValue) == "Color3" then
+--                         element:Set(targetValue)
+--                     end
+--                 else
+--                     element:Set(targetValue)
+--                 end
+--             else
+--                 if element.Type == "Toggle" then
+--                     element:Set(false)
+--                 elseif element.Type == "Slider" then
+--                     element:Set(element.Default or 0)
+--                 elseif element.Type == "Dropdown" then
+--                     element:Set(element.Default or (element.Multi and {} or ""))
+--                 elseif element.Type == "Input" then
+--                     element:Set("")
+--                 elseif element.Type == "Keybind" then
+--                     element:Set("None")
+--                 elseif element.Type == "Colorpicker" then
+--                     -- biarin default yang sudah di-set saat create
+--                 end
+--             end
+--         end
+--     end
+-- end
 
 local Icons = {
     player    = "rbxassetid://12120698352",
